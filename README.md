@@ -17,7 +17,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import routeKeeper from 'express-route-keeper';
 
-const app = express();
+const app = routeKeeper(express());
 
 // middleware for request body parse
 app.use(bodyParser.urlencoded({
@@ -32,11 +32,9 @@ app.use((req, res, next) => {
     CREATE_PROJECT,
     PROJECT_MASTER
   ];
-  
+
   next();
 });
-
-app.use(routeKeeper());
 
 // public route
 app.get('/news', routeHandler);
@@ -44,7 +42,6 @@ app.get('/news', routeHandler);
 // acl route
 app.get('/projects', READ_PROJECT, routeHandler);
 app.get('/projects', [READ_PROJECT, PROJECT_MASTER], routeHandler); // AND match
-app.get('/projects', [READ_PROJECT, PROJECT_MASTER], true, routeHandler); // OR match
 
 // parameter checker
 app.post('/login', {
@@ -69,36 +66,50 @@ app.post('/projects', {
 app.listen(PORT);
 ```
 
+### ACL OR match
+
+```javascript
+app.post('/projects', {
+  acl: {
+    actions: [
+      CREATE_PROJECT,
+      PROJECT_MASTER
+    ],
+    $or: true,
+  },
+  name: String,
+}, routeHandler);
+```
+
 ### Set custom exception
 
 ```javascript
-app.use(routeKeeper((err, req, res) => {
+routeKeeper(express(), (err, req, res) => {
   switch (err.name) {
-  
     case 'RouteKeeperParameterError':
       res.status(401);
       res.json({
         message: 'Invalid Parameter',
       });
       break;
-    
+
     case 'RouteKeeperACLError':
       res.status(401);
       res.json({
         message: 'Authentication Failed',
       });
       break;
-    
+
     default:
       console.error(err);
-      
+
       res.status(500);
       res.json({
         message: 'Server Error'
       });
       break;
   }
-}));
+});
 ```
 
 ### Action Keys
