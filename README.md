@@ -12,7 +12,7 @@ npm i express-route-keeper
 
 ## Usage
 
-```
+```javascript
 import express from 'express';
 import bodyParser from 'body-parser';
 import routeKeeper from 'express-route-keeper';
@@ -71,7 +71,7 @@ app.listen(PORT);
 
 ### Set custom exception
 
-```
+```javascript
 app.use(routeKeeper((err, req, res) => {
   switch (err.name) {
   
