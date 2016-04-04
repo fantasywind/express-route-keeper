@@ -64,7 +64,7 @@ app.post('/projects', {
     PROJECT_MASTER
   ],
   name: String,
-}
+}, routeHandler);
 
 app.listen(PORT);
 ```
