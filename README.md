@@ -15,9 +15,14 @@ npm i express-route-keeper
 ```javascript
 import express from 'express';
 import bodyParser from 'body-parser';
-import routeKeeper from 'express-route-keeper';
+import RouteKeeper from 'express-route-keeper';
 
-const app = routeKeeper(express());
+const app = express();
+const keeper = RouteKeeper();
+
+const READ_PROJECT = Symbol('READ_PROJECT');
+const CREATE_PROJECT = Symbol('CREATE_PROJECT');
+const PROJECT_MASTER = Symbol('PROJECT_MASTER');
 
 // middleware for request body parse
 app.use(bodyParser.urlencoded({
@@ -40,11 +45,14 @@ app.use((req, res, next) => {
 app.get('/news', routeHandler);
 
 // acl route
-app.get('/projects', READ_PROJECT, routeHandler);
-app.get('/projects', [READ_PROJECT, PROJECT_MASTER], routeHandler); // AND match
+app.get('/projects', keeper(READ_PROJECT), routeHandler);
+app.get('/projects', keeper([
+  READ_PROJECT,
+  PROJECT_MASTER
+]), routeHandler); // AND match
 
 // parameter checker
-app.post('/login', {
+app.post('/login', keeper({
   username: String,
   password: String,
   memorize: {
@@ -52,16 +60,16 @@ app.post('/login', {
     defaultValue: false,
     required: false,
   },
-}, routeHandler);
+}), routeHandler);
 
 // mixed mode
-app.post('/projects', {
+app.post('/projects', keeper({
   acl: [
     CREATE_PROJECT,
     PROJECT_MASTER
   ],
   name: String,
-}, routeHandler);
+}), routeHandler);
 
 app.listen(PORT);
 ```
@@ -69,7 +77,7 @@ app.listen(PORT);
 ### ACL OR match
 
 ```javascript
-app.post('/projects', {
+app.post('/projects', ({
   acl: {
     actions: [
       CREATE_PROJECT,
@@ -78,22 +86,44 @@ app.post('/projects', {
     $or: true,
   },
   name: String,
-}, routeHandler);
+}), routeHandler);
+```
+
+### Working with other middleware
+
+```javascript
+// General Usage
+// Check ACL before uploaded file handler
+app.post('/projects', keeper(CREATE_PROJECT), multer.single('cover'), routeHandler);
+
+// Body field checker with multipart
+app.post('/projects', multer.single('cover'), keeper({
+  name: String,
+  managerId: Number,
+  acl: [
+    CREATE_PROJECT
+  ],
+}), routeHandler);
 ```
 
 ### Set custom exception
 
 ```javascript
-routeKeeper(express(), (err, req, res) => {
-  switch (err.name) {
-    case 'RouteKeeperParameterError':
+import RouteKeeper, {
+  PARAMS_ERROR,
+  ACL_ERROR
+} from 'express-route-keeper';
+
+const keeper = RouteKeeper((err, req, res) => {
+  switch (err) {
+    case PARAMS_ERROR:
       res.status(401);
       res.json({
         message: 'Invalid Parameter',
       });
       break;
 
-    case 'RouteKeeperACLError':
+    case ACL_ERROR:
       res.status(401);
       res.json({
         message: 'Authentication Failed',
