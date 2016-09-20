@@ -42,8 +42,8 @@ export default function (rules, body = {}) {
         break;
 
       case Boolean:
-        if (~['true', 'false'].indexOf(val)) {
-          if (val === 'true') {
+        if (~['true', 'false', true, false].indexOf(val)) {
+          if (val === 'true' || val === true) {
             body[key] = val = true;
           } else {
             body[key] = val = false;
