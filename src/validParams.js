@@ -4,7 +4,7 @@ export default function (rules, body = {}) {
   _.forEach(rules, (raw, key) => {
     const rule = typeof raw !== 'object' ? { type: raw } : raw;
 
-    body[key] = body[key] || rule.defaultValue;
+    body[key] = ~[undefined, null].indexOf(body[key]) ? rule.defaultValue : body[key];
     let val = body[key];
 
     // Skip undefined
