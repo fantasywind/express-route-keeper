@@ -1,8 +1,12 @@
+import debug from 'debug';
+
 export const ACL_ERROR = new Error('RouteKeeperACLError');
 ACL_ERROR.name = 'RouteKeeperACLError';
 
 export const PARAMS_ERROR = new Error('RouteKeeperParameterError');
 PARAMS_ERROR.name = 'RouteKeeperParameterError';
+
+const debugErr = debug('RouteKeeper:Error');
 
 function defaultErrorHandler (err, req, res) {
   switch (err) {
@@ -21,7 +25,7 @@ function defaultErrorHandler (err, req, res) {
       break;
 
     default:
-      console.error(err);
+      debugErr(err);
 
       res.status(500);
       res.json({

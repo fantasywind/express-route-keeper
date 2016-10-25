@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import debug from 'debug';
 
 import {
   ACL_ERROR,
@@ -10,6 +11,9 @@ import validParams from './validParams.js';
 
 const ACL_AND_MODE = Symbol('ACL_AND_MODE');
 const ACL_OR_MODE = Symbol('ACL_OR_MODE');
+
+const debugACL = debug('RouteKeeper:ACL');
+const debugParams = debug('RouteKeeper:Parameters');
 
 export default function (options) {
   const errorRoute = getErrorHandler();
@@ -44,7 +48,7 @@ export default function (options) {
     switch (aclMode) {
       case ACL_OR_MODE:
         if (!_.intersection(acl, req.aclActions).length) {
-          console.error(`ACL: need at least one action in: ${acl.map((action) => action.toString()).join(', ')}`);
+          debugACL(`ACL: need at least one action in: ${acl.map((action) => action.toString()).join(', ')}`);
           return errorRoute(ACL_ERROR, req, res);
         }
         break;
@@ -54,7 +58,7 @@ export default function (options) {
           notValidAction = acl[index].toString();
           return !r
         })) {
-          console.error(`ACL: need action: ${notValidAction}`);
+          debugACL(`ACL: need action: ${notValidAction}`);
           return errorRoute(ACL_ERROR, req, res);
         }
         break;
@@ -65,7 +69,7 @@ export default function (options) {
       try {
         validParams(params, req.method === 'GET' ? req.query : req.body);
       } catch (e) {
-        console.error(e);
+        debugParams(e);
         return errorRoute(PARAMS_ERROR, req, res);
       }
     }
