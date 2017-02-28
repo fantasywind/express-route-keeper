@@ -32,8 +32,12 @@ export default function (rules, body = {}) {
         break;
 
       case Number:
-        if (!isNaN(val)) {
+        if (!isNaN(val) && val !== '') {
           body[key] = val = parseFloat(val);
+        }
+
+        if (val === '' && rule.defaultValue) {
+          body[key] = rule.defaultValue;
         }
 
         if (!_.isNumber(val)) {
