@@ -1,6 +1,6 @@
 {
   "name": "express-route-keeper",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "express route middleware for acls and parameter checker",
   "main": "lib/routeKeeper.js",
   "scripts": {

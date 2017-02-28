@@ -36,8 +36,8 @@ export default function (rules, body = {}) {
           body[key] = val = parseFloat(val);
         }
 
-        if (val === '' && rule.defaultValue) {
-          body[key] = rule.defaultValue;
+        if (val === '' && rule.defaultValue !== undefined) {
+          body[key] = val = rule.defaultValue;
         }
 
         if (!_.isNumber(val)) {
